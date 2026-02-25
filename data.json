@@ -1,0 +1,85 @@
+{
+  "proyecto": "KanbanPro - Sprint 1",
+  "listas": [
+    {
+      "id": "lista-backlog",
+      "nombre": "📋 Backlog",
+      "estado": "Backlog",
+      "tarjetas": [
+        {
+          "id": "t-1771890394716",
+          "titulo": "Conquistar el mundo",
+          "descripcion": "Perkinear a Trumph",
+          "prioridad": "Task",
+          "tag": "HOTFIX",
+          "estado": "Backlog",
+          "fecha_creacion": "2026-02-23",
+          "fecha_inicio": "2026-02-23",
+          "fecha_fin": "2027-10-05",
+          "autor": "Cristian",
+          "responsable": "Terminator"
+        }
+      ]
+    },
+    {
+      "id": "lista-doing",
+      "nombre": "⚙️ Doing",
+      "estado": "Doing",
+      "tarjetas": [
+        {
+          "id": "t-1771890308575",
+          "titulo": "Ser experto en samba",
+          "descripcion": "Aprender samba",
+          "prioridad": "Improvement",
+          "tag": "FEATURE",
+          "estado": "Doing",
+          "fecha_creacion": "2026-02-23",
+          "fecha_inicio": "2026-02-23",
+          "fecha_fin": "2026-05-01",
+          "autor": "Cristian",
+          "responsable": "Rene Puente"
+        }
+      ]
+    },
+    {
+      "id": "lista-review",
+      "nombre": "🔍 Review",
+      "estado": "Review",
+      "tarjetas": [
+        {
+          "id": "t-1771980666318",
+          "titulo": "Pan con queso",
+          "descripcion": "un pan jeje",
+          "prioridad": "Task",
+          "tag": "FEATURE",
+          "estado": "Review",
+          "fecha_creacion": "2026-02-25",
+          "fecha_inicio": "2026-02-24",
+          "fecha_fin": "2026-02-25",
+          "autor": "Cristian",
+          "responsable": "Rene Puente"
+        }
+      ]
+    },
+    {
+      "id": "lista-done",
+      "nombre": "✅ Done",
+      "estado": "Done",
+      "tarjetas": [
+        {
+          "id": "t-1771890513724",
+          "titulo": "Nacer",
+          "descripcion": "Literal nacer",
+          "prioridad": "Task",
+          "tag": "FEATURE",
+          "estado": "Done",
+          "fecha_creacion": "2026-02-23",
+          "fecha_inicio": "1994-05-18",
+          "fecha_fin": "1994-05-18",
+          "autor": "Cristian",
+          "responsable": "Cristian"
+        }
+      ]
+    }
+  ]
+}
