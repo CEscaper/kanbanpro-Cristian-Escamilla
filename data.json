@@ -1,81 +1,107 @@
 {
-  "proyecto": "KanbanPro - Sprint 1",
+  "proyecto": "KanbanPro - Sprint 2",
   "listas": [
     {
       "id": "lista-backlog",
-      "nombre": "📋 Backlog",
+      "nombre": "Backlog",
       "estado": "Backlog",
       "tarjetas": [
         {
-          "id": "t-1771890394716",
-          "titulo": "Conquistar el mundo",
-          "descripcion": "Perkinear a Trumph",
-          "prioridad": "Task",
-          "tag": "HOTFIX",
+          "id": "t-001",
+          "titulo": "Agregar validacion de formularios",
+          "descripcion": "Validar campos vacios y formato de email en registro y login",
+          "prioridad": "Improvement",
+          "tag": "FEATURE",
           "estado": "Backlog",
-          "fecha_creacion": "2026-02-23",
-          "fecha_inicio": "2026-02-23",
-          "fecha_fin": "2027-10-05",
+          "fecha_creacion": "2026-03-10",
+          "fecha_inicio": "2026-03-18",
+          "fecha_fin": "2026-03-20",
           "autor": "Cristian",
-          "responsable": "Terminator"
+          "responsable": "Cristian"
+        },
+        {
+          "id": "t-002",
+          "titulo": "Agregar boton para eliminar tarjeta",
+          "descripcion": "Permitir borrar una tarjeta directamente desde el dashboard",
+          "prioridad": "Feature",
+          "tag": "FEATURE",
+          "estado": "Backlog",
+          "fecha_creacion": "2026-03-10",
+          "fecha_inicio": "2026-03-20",
+          "fecha_fin": "2026-03-22",
+          "autor": "Cristian",
+          "responsable": "Cristian"
         }
       ]
     },
     {
       "id": "lista-doing",
-      "nombre": "⚙️ Doing",
+      "nombre": "Doing",
       "estado": "Doing",
       "tarjetas": [
         {
-          "id": "t-1771890308575",
-          "titulo": "Ser experto en samba",
-          "descripcion": "Aprender samba",
-          "prioridad": "Improvement",
+          "id": "t-003",
+          "titulo": "Conectar dashboard a base de datos",
+          "descripcion": "Reemplazar data.json por consultas reales con Sequelize",
+          "prioridad": "Feature",
           "tag": "FEATURE",
           "estado": "Doing",
-          "fecha_creacion": "2026-02-23",
-          "fecha_inicio": "2026-02-23",
-          "fecha_fin": "2026-05-01",
+          "fecha_creacion": "2026-03-12",
+          "fecha_inicio": "2026-03-14",
+          "fecha_fin": "2026-03-28",
           "autor": "Cristian",
-          "responsable": "Rene Puente"
+          "responsable": "Cristian"
         }
       ]
     },
     {
       "id": "lista-review",
-      "nombre": "🔍 Review",
+      "nombre": "Review",
       "estado": "Review",
       "tarjetas": [
         {
-          "id": "t-1771980666318",
-          "titulo": "Pan con queso",
-          "descripcion": "un pan jeje",
+          "id": "t-004",
+          "titulo": "Revisar modelos y relaciones Sequelize",
+          "descripcion": "Verificar que las relaciones hasMany y belongsTo esten correctas",
           "prioridad": "Task",
-          "tag": "FEATURE",
+          "tag": "HOTFIX",
           "estado": "Review",
-          "fecha_creacion": "2026-02-25",
-          "fecha_inicio": "2026-02-24",
-          "fecha_fin": "2026-02-25",
+          "fecha_creacion": "2026-03-13",
+          "fecha_inicio": "2026-03-14",
+          "fecha_fin": "2026-03-16",
           "autor": "Cristian",
-          "responsable": "Rene Puente"
+          "responsable": "Cristian"
         }
       ]
     },
     {
       "id": "lista-done",
-      "nombre": "✅ Done",
+      "nombre": "Done",
       "estado": "Done",
       "tarjetas": [
         {
-          "id": "t-1771890513724",
-          "titulo": "Nacer",
-          "descripcion": "Literal nacer",
+          "id": "t-005",
+          "titulo": "Configurar proyecto con Express y HBS",
+          "descripcion": "Estructura base del Sprint 1 aprobada por los stakeholders",
           "prioridad": "Task",
           "tag": "FEATURE",
           "estado": "Done",
+          "fecha_creacion": "2026-02-20",
+          "fecha_inicio": "2026-02-20",
+          "fecha_fin": "2026-02-23",
+          "autor": "Cristian",
+          "responsable": "Cristian"
+        },
+        {
+          "id": "t-006",
+          "titulo": "Implementar autenticacion con sesiones",
+          "descripcion": "Login, registro y proteccion de rutas con express-session",
+          "prioridad": "Feature",
+          "tag": "FEATURE",
+          "estado": "Done",
           "fecha_creacion": "2026-02-23",
-          "fecha_inicio": "1994-05-18",
-          "fecha_fin": "1994-05-18",
+          "fecha_inicio": "2026-02-23",
+          "fecha_fin": "2026-03-01",
           "autor": "Cristian",
           "responsable": "Cristian"
         }
