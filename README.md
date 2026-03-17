@@ -1,96 +1,91 @@
-KanbanPro
-Aplicacion de tablero Kanban con autenticacion de usuarios, construida con Node.js, Express y PostgreSQL.
-Tecnologias
+# KanbanPro
 
-Node.js
-Express 5
-Handlebars (HBS)
-PostgreSQL
-Sequelize ORM
-express-session
+Aplicacion de tablero Kanban con autenticacion de usuarios y persistencia en base de datos, construida con Node.js, Express y PostgreSQL.
 
-Requisitos previos
+## Tecnologias utilizadas
 
-Node.js 18 o superior
-PostgreSQL instalado y corriendo
-Una base de datos creada en PostgreSQL
+- Node.js con Express 5
+- Handlebars como motor de vistas
+- PostgreSQL como base de datos
+- Sequelize como ORM
+- express-session para manejo de sesiones
 
-Instalacion
+## Estructura del proyecto
 
-Clona el repositorio
+    kanbanpro/
+    ├── models/
+    │   ├── index.js
+    │   ├── Usuario.js
+    │   ├── Tablero.js
+    │   ├── Lista.js
+    │   └── Tarjeta.js
+    ├── public/
+    │   └── css/
+    │       └── style.css
+    ├── views/
+    │   ├── layouts/
+    │   │   └── layout.hbs
+    │   ├── dashboard.hbs
+    │   ├── editar-tarjeta.hbs
+    │   ├── home.hbs
+    │   ├── login.hbs
+    │   └── register.hbs
+    ├── app.js
+    ├── seed.js
+    ├── test-crud.js
+    ├── .env
+    ├── .gitignore
+    ├── package.json
+    └── README.md
 
-bashgit clone <url-del-repositorio>
-cd kanbanpro
+## Modelo de datos
 
-Instala las dependencias
+Un usuario puede tener muchos tableros.
+Un tablero puede tener muchas listas.
+Una lista puede tener muchas tarjetas.
 
-bashnpm install
+## Instalacion
 
-Crea el archivo .env en la raiz del proyecto con tus credenciales
+1. Instalar dependencias
 
-DB_NAME=tienda_db
-DB_USER=postgres
-DB_PASSWORD=postgres
-DB_HOST=localhost
-DB_PORT=5432
+    npm install
 
-Pobla la base de datos con datos de prueba
+2. Configurar variables de entorno
 
-bashnpm run seed
+    Crea un archivo .env en la raiz del proyecto con tus credenciales
 
-Inicia el servidor
+    DB_NAME=tienda_db
+    DB_USER=postgres
+    DB_PASSWORD=postgres
+    DB_HOST=localhost
+    DB_PORT=5432
 
-bashnpm start
+3. Poblar la base de datos
 
-Abre el navegador en http://localhost:3000
+    npm run seed
 
-Scripts disponibles
-ComandoDescripcionnpm startInicia el servidor webnpm run seedCrea las tablas y puebla la base de datosnpm run test:crudVerifica las operaciones CRUD
-Estructura del proyecto
-kanbanpro/
-├── models/
-│   ├── index.js        # Conexion y relaciones de Sequelize
-│   ├── Usuario.js
-│   ├── Tablero.js
-│   ├── Lista.js
-│   └── Tarjeta.js
-├── public/
-│   └── css/
-│       └── style.css
-├── views/
-│   ├── layouts/
-│   │   └── layout.hbs
-│   ├── dashboard.hbs
-│   ├── editar-tarjeta.hbs
-│   ├── home.hbs
-│   ├── login.hbs
-│   └── register.hbs
-├── app.js
-├── seed.js
-├── test-crud.js
-├── data.json
-├── users.json
-└── .env              # No se sube a GitHub
-Modelo de datos
-Usuario
-  id, nombre, email, password
+4. Iniciar el servidor
 
-  tiene muchos -> Tablero
+    npm start
 
-Tablero
-  id, nombre, descripcion, usuarioId
+    Abre el navegador en http://localhost:3000
 
-  tiene muchas -> Lista
+## Scripts disponibles
 
-Lista
-  id, nombre, estado, tableroId
-  estado: Backlog | Doing | Review | Done
+- npm start: inicia el servidor web
+- npm run seed: crea las tablas y puebla la base de datos con datos de prueba
+- npm run test:crud: verifica las operaciones CRUD de forma aislada
 
-  tiene muchas -> Tarjeta
+## Conceptos aplicados
 
-Tarjeta
-  id, titulo, descripcion, prioridad, tag, estado
-  fecha_inicio, fecha_fin, autor, responsable, listaId
-Credenciales de prueba
-Email:    cristian@kanbanpro.com
-Password: 123456
+- hasMany y belongsTo: relaciones uno a muchos entre los modelos
+- foreignKey: clave foranea explicita en cada relacion
+- as: alias necesario para el Eager Loading
+- Eager Loading: consultas con include para obtener datos relacionados en una sola query
+- bulkCreate: insercion de multiples registros en una sola operacion
+- sync force true: elimina y recrea las tablas, solo para desarrollo
+
+## Credenciales de prueba
+
+    Email:    cristian@kanbanpro.com
+    Password: 123456
