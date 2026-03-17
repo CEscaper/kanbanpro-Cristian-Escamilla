@@ -1,21 +1,7 @@
 // models/index.js
-// Punto central: conexion a PostgreSQL + importa modelos + define relaciones
+// Importa la conexion, activa los modelos y define las relaciones.
  
-require('dotenv').config();
-const { Sequelize } = require('sequelize');
- 
-// Conexion usando las variables de entorno definidas en .env
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASSWORD,
-  {
-    host:    process.env.DB_HOST,
-    port:    process.env.DB_PORT,
-    dialect: 'postgres',
-    logging: false,
-  }
-);
+const sequelize = require('../config/database');
  
 // Importar modelos
 const Usuario = require('./Usuario')(sequelize);
