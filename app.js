@@ -157,18 +157,33 @@ app.post("/register", async (req, res) => {
     // se hashea la contrasena antes de guardarla
     const passwordHasheada = await bcrypt.hash(password, 10);
 
-    // se crea el usuario en la base de datos
+// se crea el usuario en la base de datos
     const nuevoUsuario = await Usuario.create({
       nombre,
       email,
-      password: passwordHasheada,
+      password: passwordHasheada
     });
+
+    // se crea un tablero por defecto para el nuevo usuario
+    const tableroDefault = await Tablero.create({
+      nombre: 'Mi primer tablero',
+      descripcion: 'Tablero creado automaticamente',
+      usuarioId: nuevoUsuario.id
+    });
+
+    // se crean las cuatro listas por defecto dentro del tablero
+    await Lista.bulkCreate([
+      { nombre: 'Backlog', estado: 'Backlog', tableroId: tableroDefault.id },
+      { nombre: 'Doing',   estado: 'Doing',   tableroId: tableroDefault.id },
+      { nombre: 'Review',  estado: 'Review',  tableroId: tableroDefault.id },
+      { nombre: 'Done',    estado: 'Done',    tableroId: tableroDefault.id }
+    ]);
 
     // se inicia sesion automaticamente con el nuevo usuario
     req.session.usuario = {
       id: nuevoUsuario.id,
       nombre: nuevoUsuario.nombre,
-      email: nuevoUsuario.email,
+      email: nuevoUsuario.email
     };
 
     res.redirect("/dashboard");
