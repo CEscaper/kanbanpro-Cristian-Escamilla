@@ -1,52 +1,48 @@
 // importaciones
-const express = require('express');
-const hbs = require('hbs');
-const fs = require('fs');
-const path = require('path');
-const session = require('express-session');
+const express = require("express");
+const hbs = require("hbs");
+const path = require("path");
+const session = require("express-session");
+require("dotenv").config(); // se cargan las variables de entorno desde .env
+const bcrypt = require("bcryptjs");
+const { Tablero, Lista, Tarjeta, Usuario } = require("./models");
+
+const authRoutes = require("./routes/auth"); // se importan las rutas de autenticacion
+const apiRoutes = require("./routes/api"); // se importan las rutas protegidas de la API
 
 const app = express();
 const PORT = 3000;
 
 // motor de vistas
-app.set('view engine', 'hbs');
-app.set('views', path.join(__dirname, 'views'));
-hbs.registerPartials(path.join(__dirname, 'views/layouts'));
+app.set("view engine", "hbs");
+app.set("views", path.join(__dirname, "views"));
+hbs.registerPartials(path.join(__dirname, "views/layouts"));
 
 // le decimos cual es el layout principal
-const hbsEngine = require('hbs');
+const hbsEngine = require("hbs");
 hbsEngine.__express = hbsEngine.__express;
-app.set('view options', { layout: 'layouts/layout' });
+app.set("view options", { layout: "layouts/layout" });
 
 // helper para comparar dos valores en las vistas
-hbs.registerHelper('eq', (a, b) => a === b);
+hbs.registerHelper("eq", (a, b) => a === b);
 
 // middlewares
-app.use(express.static(path.join(__dirname, 'public'))); // sirve el css, imagenes, etc
+app.use(express.static(path.join(__dirname, "public"))); // sirve el css, imagenes, etc
 app.use(express.urlencoded({ extended: false })); // para leer los datos del formulario
+app.use(express.json()); // se habilita la lectura de JSON en el cuerpo del request
+
+// rutas de la API
+app.use("/api/auth", authRoutes); // se montan las rutas de autenticacion
+app.use("/api", apiRoutes); // se montan las rutas protegidas bajo el prefijo /api
 
 // configuracion de sesiones
-app.use(session({
-  secret: 'kanbanpro-secret', // palabra secreta para firmar la cookie
-  resave: false,              // no guardar la sesion si no cambio nada
-  saveUninitialized: false    // no crear sesion hasta que haya algo que guardar
-}));
-
-// ruta del archivo de datos
-const DATA_PATH = path.join(__dirname, 'data.json');
-const USERS_PATH = path.join(__dirname, 'users.json');
-
-// funcion para leer y parsear el json de datos
-function leerDatos() {
-  const contenidoString = fs.readFileSync(DATA_PATH, 'utf-8');
-  return JSON.parse(contenidoString);
-}
-
-// funcion para leer y parsear el json de usuarios
-function leerUsuarios() {
-  const contenidoString = fs.readFileSync(USERS_PATH, 'utf-8');
-  return JSON.parse(contenidoString);
-}
+app.use(
+  session({
+    secret: "kanbanpro-secret", // palabra secreta para firmar la cookie
+    resave: false, // no guardar la sesion si no cambio nada
+    saveUninitialized: false, // no crear sesion hasta que haya algo que guardar
+  }),
+);
 
 // middleware que verifica si hay sesion activa
 // si no hay sesion, manda al login
@@ -54,177 +50,215 @@ function verificarSesion(req, res, next) {
   if (req.session.usuario) {
     next(); // hay sesion, puede continuar
   } else {
-    res.redirect('/login'); // no hay sesion, al login
+    res.redirect("/login"); // no hay sesion, al login
   }
 }
 
 // pagina de inicio
-app.get('/', (req, res) => {
-  res.render('home');
+app.get("/", (req, res) => {
+  res.render("home");
 });
 
 // pagina de registro
-app.get('/register', (req, res) => {
-  res.render('register');
+app.get("/register", (req, res) => {
+  res.render("register");
 });
 
 // pagina de login
-app.get('/login', (req, res) => {
-  res.render('login');
+app.get("/login", (req, res) => {
+  res.render("login");
 });
 
 // dashboard - protegido, solo entra si hay sesion activa
-app.get('/dashboard', verificarSesion, (req, res) => {
-  const datos = leerDatos();
-  // pasamos tambien el usuario de la sesion para mostrarlo en la vista
-  res.render('dashboard', { ...datos, usuario: req.session.usuario });
+app.get("/dashboard", verificarSesion, async (req, res) => {
+  try {
+    // se obtienen todos los tableros del usuario con sus listas y tarjetas anidadas
+const tableros = await Tablero.findAll({
+  where: { usuarioId: req.session.usuario.id },
+  include: [{
+    model: Lista,
+    as: 'listas',
+    include: [{
+      model: Tarjeta,
+      as: 'tarjetas'
+    }],
+    order: [['id', 'ASC']] // se ordenan las listas por id ascendente
+  }]
+});
+
+// se define el orden correcto de las listas
+const ordenListas = ['Backlog', 'Doing', 'Review', 'Done'];
+
+// se convierten a objetos planos y se ordenan las listas de cada tablero
+const tablerosPlanos = tableros.map((t) => {
+      const tablero = t.toJSON();
+      tablero.listas = tablero.listas.sort((a, b) => {
+        return ordenListas.indexOf(a.estado) - ordenListas.indexOf(b.estado);
+      });
+      return tablero;
+    });
+
+    res.render("dashboard", {
+      tableros: tablerosPlanos,
+      usuario: req.session.usuario,
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error al cargar el dashboard");
+  }
 });
 
 // recibe el formulario de login
-app.post('/login', (req, res) => {
+app.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  // buscamos el usuario en users.json
-  const { usuarios } = leerUsuarios();
-  const usuarioEncontrado = usuarios.find(u => u.email === email);
+  try {
+    // se busca el usuario en la base de datos
+    const usuario = await Usuario.findOne({ where: { email } });
 
-  // si no existe el email
-  if (!usuarioEncontrado) {
-    return res.render('login', { error: 'El email no está registrado' });
+    if (!usuario) {
+      return res.render("login", { error: "El email no esta registrado" });
+    }
+
+    // se compara la contrasena ingresada contra el hash guardado
+    const passwordValida = await bcrypt.compare(password, usuario.password);
+
+    if (!passwordValida) {
+      return res.render("login", { error: "Contrasena incorrecta" });
+    }
+
+    // se guarda el usuario en la sesion
+    req.session.usuario = {
+      id: usuario.id,
+      nombre: usuario.nombre,
+      email: usuario.email,
+    };
+
+    res.redirect("/dashboard");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error al iniciar sesion");
   }
-
-  // si la contraseña no coincide
-  if (usuarioEncontrado.password !== password) {
-    return res.render('login', { error: 'Contraseña incorrecta' });
-  }
-
-  // todo bien, guardamos el usuario en la sesion y vamos al dashboard
-  req.session.usuario = {
-    id: usuarioEncontrado.id,
-    nombre: usuarioEncontrado.nombre,
-    email: usuarioEncontrado.email
-  };
-
-  res.redirect('/dashboard');
 });
 
 // recibe el formulario de registro
-app.post('/register', (req, res) => {
+app.post("/register", async (req, res) => {
   const { nombre, email, password } = req.body;
 
-  // leer usuarios actuales
-  const datos = leerUsuarios();
+  try {
+    // se verifica que el email no este ya registrado
+    const usuarioExistente = await Usuario.findOne({ where: { email } });
 
-  // verificar que el email no exista ya
-  const emailExiste = datos.usuarios.find(u => u.email === email);
+    if (usuarioExistente) {
+      return res.render("register", { error: "Ese email ya esta registrado" });
+    }
 
-  if (emailExiste) {
-    return res.render('register', { error: 'Ese email ya está registrado' });
+    // se hashea la contrasena antes de guardarla
+    const passwordHasheada = await bcrypt.hash(password, 10);
+
+    // se crea el usuario en la base de datos
+    const nuevoUsuario = await Usuario.create({
+      nombre,
+      email,
+      password: passwordHasheada,
+    });
+
+    // se inicia sesion automaticamente con el nuevo usuario
+    req.session.usuario = {
+      id: nuevoUsuario.id,
+      nombre: nuevoUsuario.nombre,
+      email: nuevoUsuario.email,
+    };
+
+    res.redirect("/dashboard");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error al registrar el usuario");
   }
-
-  // crear el nuevo usuario
-  const nuevoUsuario = {
-    id: 'u-' + Date.now(),
-    nombre: nombre,
-    email: email,
-    password: password
-  };
-
-  // agregar al array y guardar
-  datos.usuarios.push(nuevoUsuario);
-  fs.writeFileSync(USERS_PATH, JSON.stringify(datos, null, 2), 'utf-8');
-
-  // iniciar sesion automaticamente con el nuevo usuario
-  req.session.usuario = {
-    id: nuevoUsuario.id,
-    nombre: nuevoUsuario.nombre,
-    email: nuevoUsuario.email
-  };
-
-  // ir al dashboard
-  res.redirect('/dashboard');
 });
 
 // cerrar sesion
-app.get('/logout', (req, res) => {
+app.get("/logout", (req, res) => {
   req.session.destroy(); // borramos la sesion
-  res.redirect('/login');
+  res.redirect("/login");
 });
 
 // muestra el formulario de edicion pre-llenado
-app.get('/editar-tarjeta/:id', verificarSesion, (req, res) => {
-  const { id } = req.params; // el id viene en la URL: /editar-tarjeta/t-123
-  const datos = leerDatos();
+app.get("/editar-tarjeta/:id", verificarSesion, async (req, res) => {
+  const { id } = req.params;
 
-  // buscar la tarjeta en todas las listas
-  let tarjetaEncontrada = null;
-  for (const lista of datos.listas) {
-    const tarjeta = lista.tarjetas.find(t => t.id === id);
-    if (tarjeta) {
-      tarjetaEncontrada = tarjeta;
-      break;
+  try {
+    // se busca la tarjeta por su id en la base de datos
+    const tarjeta = await Tarjeta.findByPk(id);
+
+    if (!tarjeta) {
+      return res.redirect("/dashboard");
     }
-  }
 
-  // si no existe redirigir al dashboard
-  if (!tarjetaEncontrada) {
-    return res.redirect('/dashboard');
+    res.render("editar-tarjeta", { tarjeta });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error al cargar la tarjeta");
   }
-
-  res.render('editar-tarjeta', { tarjeta: tarjetaEncontrada });
 });
 
 // recibe el formulario de edicion y actualiza la tarjeta
-app.post('/editar-tarjeta', verificarSesion, (req, res) => {
-  const { id, titulo, descripcion, prioridad, tag, estado, fecha_inicio, fecha_fin, autor, responsable } = req.body;
+app.post("/editar-tarjeta", verificarSesion, async (req, res) => {
+  const {
+    id,
+    titulo,
+    descripcion,
+    prioridad,
+    tag,
+    estado,
+    fecha_inicio,
+    fecha_fin,
+    autor,
+    responsable,
+  } = req.body;
 
-  const datos = leerDatos();
+  try {
+    // se busca la tarjeta por su id
+    const tarjeta = await Tarjeta.findByPk(id);
 
-  // buscar en que lista esta la tarjeta y reemplazarla
-  for (const lista of datos.listas) {
-    const index = lista.tarjetas.findIndex(t => t.id === id);
-
-    if (index !== -1) {
-      // guardar la fecha de creacion original
-      const fechaCreacion = lista.tarjetas[index].fecha_creacion;
-
-      // si cambio de estado, moverla a la lista correcta
-      if (lista.estado !== estado) {
-        // sacar la tarjeta de la lista actual
-        lista.tarjetas.splice(index, 1);
-
-        // meterla en la lista nueva
-        const listaDestino = datos.listas.find(l => l.estado === estado);
-        if (listaDestino) {
-          listaDestino.tarjetas.push({
-            id, titulo, descripcion, prioridad, tag, estado,
-            fecha_creacion: fechaCreacion,
-            fecha_inicio: fecha_inicio || '',
-            fecha_fin: fecha_fin || '',
-            autor, responsable
-          });
-        }
-      } else {
-        // mismo estado, solo actualizamos los datos
-        lista.tarjetas[index] = {
-          id, titulo, descripcion, prioridad, tag, estado,
-          fecha_creacion: fechaCreacion,
-          fecha_inicio: fecha_inicio || '',
-          fecha_fin: fecha_fin || '',
-          autor, responsable
-        };
-      }
-      break;
+    if (!tarjeta) {
+      return res.redirect("/dashboard");
     }
-  }
 
-  fs.writeFileSync(DATA_PATH, JSON.stringify(datos, null, 2), 'utf-8');
-  res.redirect('/dashboard');
+ // se busca la lista que corresponde al nuevo estado
+    const listaDestino = await Lista.findOne({
+      where: { estado },
+      include: [{
+        model: Tablero,
+        as: 'tablero',
+        where: { usuarioId: req.session.usuario.id }
+      }]
+    });
+
+    // se actualiza la tarjeta con los nuevos datos y la nueva lista
+    await tarjeta.update({
+      titulo,
+      descripcion,
+      prioridad,
+      tag,
+      estado,
+      fecha_inicio: fecha_inicio || null,
+      fecha_fin: fecha_fin || null,
+      autor,
+      responsable,
+      listaId: listaDestino ? listaDestino.id : tarjeta.listaId
+    });
+
+    res.redirect("/dashboard");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error al actualizar la tarjeta");
+  }
 });
 
 // recibe el formulario de nueva tarjeta
-app.post('/nueva-tarjeta', (req, res) => {
-
+app.post("/nueva-tarjeta", verificarSesion, async (req, res) => {
   const {
     titulo,
     descripcion,
@@ -234,42 +268,66 @@ app.post('/nueva-tarjeta', (req, res) => {
     fecha_inicio,
     fecha_fin,
     autor,
-    responsable
+    responsable,
   } = req.body;
 
-  // leer estado actual
-  const datos = leerDatos();
+  try {
+    // se busca la primera lista del usuario que coincida con el estado elegido
+    const lista = await Lista.findOne({
+      where: { estado },
+      include: [
+        {
+          model: Tablero,
+          as: "tablero",
+          where: { usuarioId: req.session.usuario.id },
+        },
+      ],
+    });
 
-  // armar la tarjeta nueva
-  const nuevaTarjeta = {
-    id: 't-' + Date.now(), // id unico con timestamp
-    titulo: titulo,
-    descripcion: descripcion || '',
-    prioridad: prioridad || 'Task',
-    tag: tag || 'FEATURE',
-    estado: estado || 'Backlog',
-    fecha_creacion: new Date().toISOString().split('T')[0], // solo la fecha, sin la hora
-    fecha_inicio: fecha_inicio || '', // puede quedar vacio si recien se crea
-    fecha_fin: fecha_fin || '',
-    autor: autor || 'Anonimo',
-    responsable: responsable || ''
-  };
+    if (!lista) {
+      return res.redirect("/dashboard");
+    }
 
-  // buscar la lista que corresponde segun el estado elegido
-  const listaDestino = datos.listas.find(lista => lista.estado === nuevaTarjeta.estado);
+    // se crea la tarjeta asociada a la lista encontrada
+    await Tarjeta.create({
+      titulo,
+      descripcion: descripcion || "",
+      prioridad: prioridad || "Task",
+      tag: tag || "FEATURE",
+      estado: estado || "Backlog",
+      fecha_inicio: fecha_inicio || null,
+      fecha_fin: fecha_fin || null,
+      autor: autor || "Anonimo",
+      responsable: responsable || "",
+      listaId: lista.id,
+    });
 
-  if (listaDestino) {
-    listaDestino.tarjetas.push(nuevaTarjeta);
-  } else {
-    // si no encuentra la lista, va al backlog por defecto
-    datos.listas[0].tarjetas.push(nuevaTarjeta);
+    res.redirect("/dashboard");
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Error al crear la tarjeta");
   }
+});
 
-  // guardar el json actualizado
-  fs.writeFileSync(DATA_PATH, JSON.stringify(datos, null, 2), 'utf-8');
+// elimina una tarjeta
+app.post('/eliminar-tarjeta/:id', verificarSesion, async (req, res) => {
+  const { id } = req.params;
 
-  // volver al dashboard
-  res.redirect('/dashboard');
+  try {
+    // se busca la tarjeta por su id
+    const tarjeta = await Tarjeta.findByPk(id);
+
+    if (!tarjeta) {
+      return res.redirect('/dashboard');
+    }
+
+    // se elimina la tarjeta de la base de datos
+    await tarjeta.destroy();
+    res.redirect('/dashboard');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error al eliminar la tarjeta');
+  }
 });
 
 // iniciar servidor

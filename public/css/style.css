@@ -1,4 +1,4 @@
-/* ── Reset y Variables ── */
+/* Reset y Variables */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
@@ -19,7 +19,7 @@ body {
   min-height: 100vh;
 }
 
-/* ── Navbar ── */
+/* Navbar */
 .navbar {
   background: var(--blanco);
   padding: 1rem 2rem;
@@ -33,10 +33,10 @@ body {
 .nav-links a { margin-left: 1.5rem; text-decoration: none; color: var(--texto-suave); font-size: 0.9rem; }
 .nav-links a:hover { color: var(--primario); }
 
-/* ── Container ── */
+/* Container */
 .container { max-width: 1200px; margin: 2rem auto; padding: 0 1.5rem; }
 
-/* ── Botones ── */
+/* Botones */
 .btn {
   display: inline-block; padding: 0.6rem 1.4rem; border-radius: 8px;
   font-size: 0.9rem; font-weight: 600; cursor: pointer;
@@ -46,13 +46,13 @@ body {
 .btn-primary:hover { background: var(--primario-hover); }
 .btn-secondary { background: transparent; color: var(--primario); border: 2px solid var(--primario); }
 
-/* ── Hero (Home) ── */
+/* Hero */
 .hero { text-align: center; padding: 5rem 1rem; }
 .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
 .hero p { font-size: 1.1rem; color: var(--texto-suave); margin-bottom: 2rem; }
 .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 
-/* ── Auth Card ── */
+/* Auth Card */
 .auth-card {
   max-width: 420px; margin: 3rem auto;
   background: var(--blanco); border-radius: 12px;
@@ -70,12 +70,12 @@ body {
 .auth-card p { margin-top: 1rem; font-size: 0.85rem; text-align: center; color: var(--texto-suave); }
 .auth-card a { color: var(--primario); }
 
-/* ── Dashboard ── */
+/* Dashboard */
 .dashboard-header { margin-bottom: 1.5rem; }
 .dashboard-header h1 { font-size: 1.8rem; }
 .dashboard-header p { color: var(--texto-suave); }
 
-/* ── Formulario Nueva Tarjeta ── */
+/* Formulario Nueva Tarjeta */
 .nueva-tarjeta-form {
   background: var(--blanco); border-radius: 12px;
   padding: 1.5rem; margin-bottom: 2rem;
@@ -89,8 +89,13 @@ body {
 }
 .nueva-tarjeta-form input:focus { outline: none; border-color: var(--primario); }
 
-/* ── Tablero Kanban ── */
-.tablero { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+/* Tablero Kanban */
+.tablero-titulo {
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+  color: var(--texto);
+}
+.tablero { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
 .lista {
   background: var(--blanco); border-radius: 12px;
   padding: 1.25rem; box-shadow: var(--sombra);
@@ -108,10 +113,10 @@ body {
 .tarjeta p { font-size: 0.8rem; color: var(--texto-suave); }
 .lista-vacia { font-size: 0.85rem; color: var(--texto-suave); text-align: center; padding: 1rem; }
 
-/* ── Footer ── */
+/* Footer */
 footer { text-align: center; padding: 2rem; color: var(--texto-suave); font-size: 0.8rem; }
 
-/* ── Form Grid ── */
+/* Form Grid */
 .form-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -132,21 +137,16 @@ footer { text-align: center; padding: 2rem; color: var(--texto-suave); font-size
 .form-group select:focus { outline: none; border-color: var(--primario); }
 .span-2 { grid-column: span 2; }
 
-/* ── Tarjeta: nueva info ── */
+/* Tarjeta badges */
 .tarjeta-badges { display: flex; gap: 0.4rem; margin-bottom: 0.5rem; flex-wrap: wrap; }
-
 .badge {
   font-size: 0.68rem; font-weight: 700;
   padding: 0.2rem 0.55rem; border-radius: 99px;
   text-transform: uppercase; letter-spacing: 0.04em;
 }
-
-/* Colores por TAG */
 .badge-FEATURE     { background: #dbeafe; color: #1d4ed8; }
 .badge-BUG         { background: #fee2e2; color: #b91c1c; }
 .badge-HOTFIX      { background: #fef3c7; color: #b45309; }
-
-/* Colores por Prioridad */
 .badge-Bug         { background: #fee2e2; color: #b91c1c; }
 .badge-Feature     { background: #ede9fe; color: #6d28d9; }
 .badge-Task        { background: #e0f2fe; color: #0369a1; }
@@ -162,7 +162,7 @@ footer { text-align: center; padding: 2rem; color: var(--texto-suave); font-size
   padding-top: 0.5rem; margin-top: 0.4rem;
 }
 
-/* ── Alerta de error en login ── */
+/* Alerta de error */
 .alert-error {
   background: #fee2e2;
   color: #b91c1c;
@@ -173,7 +173,7 @@ footer { text-align: center; padding: 2rem; color: var(--texto-suave); font-size
   margin-bottom: 1rem;
 }
 
-/* ── Usuario en navbar ── */
+/* Usuario en navbar */
 .nav-usuario {
   margin-left: 1.5rem;
   font-size: 0.9rem;
@@ -181,7 +181,7 @@ footer { text-align: center; padding: 2rem; color: var(--texto-suave); font-size
   font-weight: 600;
 }
 
-/* ── Boton logout ── */
+/* Boton logout */
 .btn-logout {
   margin-left: 1rem;
   background: transparent;
@@ -190,11 +190,9 @@ footer { text-align: center; padding: 2rem; color: var(--texto-suave); font-size
   padding: 0.3rem 0.9rem;
   font-size: 0.8rem;
 }
-.btn-logout:hover {
-  background: #fee2e2;
-}
+.btn-logout:hover { background: #fee2e2; }
 
-/* ── Botón editar tarjeta ── */
+/* Boton editar tarjeta */
 .tarjeta-acciones {
   margin-top: 0.5rem;
   display: flex;
@@ -212,4 +210,18 @@ footer { text-align: center; padding: 2rem; color: var(--texto-suave); font-size
 .btn-editar:hover {
   background: var(--fondo);
   border-color: var(--primario);
+}
+
+/* Boton eliminar tarjeta */
+.btn-eliminar {
+  font-size: 0.72rem;
+  color: #b91c1c;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid #fca5a5;
+  border-radius: 6px;
+  background: var(--blanco);
+  cursor: pointer;
+}
+.btn-eliminar:hover {
+  background: #fee2e2;
 }

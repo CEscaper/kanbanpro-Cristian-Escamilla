@@ -5,29 +5,16 @@
 
     <div class="form-grid">
 
-      {{! Fila 1: Título y Responsable }}
       <div class="form-group span-2">
         <label for="titulo">Título *</label>
-        <input
-          type="text"
-          id="titulo"
-          name="titulo"
-          placeholder="Nombre de la tarea"
-          required
-        />
+        <input type="text" id="titulo" name="titulo" placeholder="Nombre de la tarea" required />
       </div>
 
       <div class="form-group span-2">
         <label for="descripcion">Descripción</label>
-        <input
-          type="text"
-          id="descripcion"
-          name="descripcion"
-          placeholder="¿Qué hay que hacer?"
-        />
+        <input type="text" id="descripcion" name="descripcion" placeholder="¿Qué hay que hacer?" />
       </div>
 
-      {{! Fila 2: Selects }}
       <div class="form-group">
         <label for="prioridad">Prioridad</label>
         <select id="prioridad" name="prioridad">
@@ -57,7 +44,6 @@
         </select>
       </div>
 
-      {{! Fila 3: Fechas }}
       <div class="form-group">
         <label for="fecha_inicio">Fecha Inicio</label>
         <input type="date" id="fecha_inicio" name="fecha_inicio" />
@@ -68,7 +54,6 @@
         <input type="date" id="fecha_fin" name="fecha_fin" />
       </div>
 
-      {{! Fila 4: Personas }}
       <div class="form-group">
         <label for="autor">Autor</label>
         <input type="text" id="autor" name="autor" placeholder="Tu nombre" />
@@ -76,12 +61,7 @@
 
       <div class="form-group">
         <label for="responsable">Responsable</label>
-        <input
-          type="text"
-          id="responsable"
-          name="responsable"
-          placeholder="Asignado a..."
-        />
+        <input type="text" id="responsable" name="responsable" placeholder="Asignado a..." />
       </div>
 
     </div>
@@ -91,6 +71,8 @@
 </div>
 
 {{! Tablero Kanban }}
+{{#each tableros}}
+<h2 class="tablero-titulo">{{nombre}}</h2>
 <div class="tablero">
   {{#each listas}}
     <div class="lista">
@@ -100,19 +82,14 @@
         {{#each tarjetas}}
           <div class="tarjeta">
 
-            {{! Badges superiores }}
             <div class="tarjeta-badges">
               <span class="badge badge-tag badge-{{tag}}">{{tag}}</span>
-              <span
-                class="badge badge-prioridad badge-{{prioridad}}"
-              >{{prioridad}}</span>
+              <span class="badge badge-prioridad badge-{{prioridad}}">{{prioridad}}</span>
             </div>
 
-            {{! Contenido principal }}
             <h4>{{titulo}}</h4>
             <p class="tarjeta-desc">{{descripcion}}</p>
 
-            {{! Metadatos }}
             <div class="tarjeta-meta">
               <span title="Autor">✍️ {{autor}}</span>
               {{#if responsable}}
@@ -120,9 +97,8 @@
               {{/if}}
             </div>
 
-            {{! Fechas }}
             <div class="tarjeta-fechas">
-              <span title="Creado">📅 {{fecha_creacion}}</span>
+              <span title="Creado">📅 {{createdAt}}</span>
               {{#if fecha_inicio}}
                 <span title="Inicio">🚀 {{fecha_inicio}}</span>
               {{/if}}
@@ -132,7 +108,10 @@
             </div>
 
             <div class="tarjeta-acciones">
-              <a href="/editar-tarjeta/{{id}}" class="btn-editar">✏️ Editar</a>
+              <a href="/editar-tarjeta/{{this.id}}" class="btn-editar">✏️ Editar</a>
+              <form method="POST" action="/eliminar-tarjeta/{{this.id}}">
+                <button type="submit" class="btn-eliminar">🗑️ Eliminar</button>
+              </form>
             </div>
 
           </div>
@@ -146,3 +125,4 @@
     </div>
   {{/each}}
 </div>
+{{/each}}
