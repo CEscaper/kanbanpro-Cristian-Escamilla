@@ -346,6 +346,13 @@ app.post('/eliminar-tarjeta/:id', verificarSesion, async (req, res) => {
 });
 
 // iniciar servidor
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+// se sincronizan los modelos con la base de datos antes de arrancar
+const { sequelize } = require('./models');
+
+sequelize.sync({ alter: true }).then(() => {
+  app.listen(PORT, () => {
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  });
+}).catch(error => {
+  console.error('Error al sincronizar la base de datos:', error);
 });
