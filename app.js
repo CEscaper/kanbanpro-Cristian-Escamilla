@@ -73,24 +73,28 @@ app.get("/login", (req, res) => {
 app.get("/dashboard", verificarSesion, async (req, res) => {
   try {
     // se obtienen todos los tableros del usuario con sus listas y tarjetas anidadas
-const tableros = await Tablero.findAll({
-  where: { usuarioId: req.session.usuario.id },
-  include: [{
-    model: Lista,
-    as: 'listas',
-    include: [{
-      model: Tarjeta,
-      as: 'tarjetas'
-    }],
-    order: [['id', 'ASC']] // se ordenan las listas por id ascendente
-  }]
-});
+    const tableros = await Tablero.findAll({
+      where: { usuarioId: req.session.usuario.id },
+      include: [
+        {
+          model: Lista,
+          as: "listas",
+          include: [
+            {
+              model: Tarjeta,
+              as: "tarjetas",
+            },
+          ],
+          order: [["id", "ASC"]], // se ordenan las listas por id ascendente
+        },
+      ],
+    });
 
-// se define el orden correcto de las listas
-const ordenListas = ['Backlog', 'Doing', 'Review', 'Done'];
+    // se define el orden correcto de las listas
+    const ordenListas = ["Backlog", "Doing", "Review", "Done"];
 
-// se convierten a objetos planos y se ordenan las listas de cada tablero
-const tablerosPlanos = tableros.map((t) => {
+    // se convierten a objetos planos y se ordenan las listas de cada tablero
+    const tablerosPlanos = tableros.map((t) => {
       const tablero = t.toJSON();
       tablero.listas = tablero.listas.sort((a, b) => {
         return ordenListas.indexOf(a.estado) - ordenListas.indexOf(b.estado);
@@ -102,7 +106,6 @@ const tablerosPlanos = tableros.map((t) => {
       tableros: tablerosPlanos,
       usuario: req.session.usuario,
     });
-
   } catch (error) {
     console.error(error);
     res.status(500).send("Error al cargar el dashboard");
@@ -157,33 +160,33 @@ app.post("/register", async (req, res) => {
     // se hashea la contrasena antes de guardarla
     const passwordHasheada = await bcrypt.hash(password, 10);
 
-// se crea el usuario en la base de datos
+    // se crea el usuario en la base de datos
     const nuevoUsuario = await Usuario.create({
       nombre,
       email,
-      password: passwordHasheada
+      password: passwordHasheada,
     });
 
     // se crea un tablero por defecto para el nuevo usuario
     const tableroDefault = await Tablero.create({
-      nombre: 'Mi primer tablero',
-      descripcion: 'Tablero creado automaticamente',
-      usuarioId: nuevoUsuario.id
+      nombre: "Mi primer tablero",
+      descripcion: "Tablero creado automaticamente",
+      usuarioId: nuevoUsuario.id,
     });
 
     // se crean las cuatro listas por defecto dentro del tablero
     await Lista.bulkCreate([
-      { nombre: 'Backlog', estado: 'Backlog', tableroId: tableroDefault.id },
-      { nombre: 'Doing',   estado: 'Doing',   tableroId: tableroDefault.id },
-      { nombre: 'Review',  estado: 'Review',  tableroId: tableroDefault.id },
-      { nombre: 'Done',    estado: 'Done',    tableroId: tableroDefault.id }
+      { nombre: "Backlog", estado: "Backlog", tableroId: tableroDefault.id },
+      { nombre: "Doing", estado: "Doing", tableroId: tableroDefault.id },
+      { nombre: "Review", estado: "Review", tableroId: tableroDefault.id },
+      { nombre: "Done", estado: "Done", tableroId: tableroDefault.id },
     ]);
 
     // se inicia sesion automaticamente con el nuevo usuario
     req.session.usuario = {
       id: nuevoUsuario.id,
       nombre: nuevoUsuario.nombre,
-      email: nuevoUsuario.email
+      email: nuevoUsuario.email,
     };
 
     res.redirect("/dashboard");
@@ -241,14 +244,16 @@ app.post("/editar-tarjeta", verificarSesion, async (req, res) => {
       return res.redirect("/dashboard");
     }
 
- // se busca la lista que corresponde al nuevo estado
+    // se busca la lista que corresponde al nuevo estado
     const listaDestino = await Lista.findOne({
       where: { estado },
-      include: [{
-        model: Tablero,
-        as: 'tablero',
-        where: { usuarioId: req.session.usuario.id }
-      }]
+      include: [
+        {
+          model: Tablero,
+          as: "tablero",
+          where: { usuarioId: req.session.usuario.id },
+        },
+      ],
     });
 
     // se actualiza la tarjeta con los nuevos datos y la nueva lista
@@ -262,7 +267,7 @@ app.post("/editar-tarjeta", verificarSesion, async (req, res) => {
       fecha_fin: fecha_fin || null,
       autor,
       responsable,
-      listaId: listaDestino ? listaDestino.id : tarjeta.listaId
+      listaId: listaDestino ? listaDestino.id : tarjeta.listaId,
     });
 
     res.redirect("/dashboard");
@@ -325,7 +330,7 @@ app.post("/nueva-tarjeta", verificarSesion, async (req, res) => {
 });
 
 // elimina una tarjeta
-app.post('/eliminar-tarjeta/:id', verificarSesion, async (req, res) => {
+app.post("/eliminar-tarjeta/:id", verificarSesion, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -333,26 +338,75 @@ app.post('/eliminar-tarjeta/:id', verificarSesion, async (req, res) => {
     const tarjeta = await Tarjeta.findByPk(id);
 
     if (!tarjeta) {
-      return res.redirect('/dashboard');
+      return res.redirect("/dashboard");
     }
 
     // se elimina la tarjeta de la base de datos
     await tarjeta.destroy();
-    res.redirect('/dashboard');
+    res.redirect("/dashboard");
   } catch (error) {
     console.error(error);
-    res.status(500).send('Error al eliminar la tarjeta');
+    res.status(500).send("Error al eliminar la tarjeta");
   }
 });
 
 // iniciar servidor
 // se sincronizan los modelos con la base de datos antes de arrancar
-const { sequelize } = require('./models');
+const { sequelize } = require("./models");
 
-sequelize.sync({ alter: true }).then(() => {
-  app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
-  });
-}).catch(error => {
-  console.error('Error al sincronizar la base de datos:', error);
-});
+async function iniciarServidor() {
+  try {
+    // se sincronizan los modelos con la base de datos
+    await sequelize.sync({ alter: true });
+    console.log("Base de datos sincronizada.");
+
+    // se verifica si el usuario demo ya existe
+    const usuarioDemo = await Usuario.findOne({
+      where: { email: "demo@kanbanpro.com" },
+    });
+
+    if (!usuarioDemo) {
+      // se crea el usuario demo con la contrasena hasheada
+      const passwordHasheada = await bcrypt.hash("123456", 10);
+      const usuario = await Usuario.create({
+        nombre: "Usuario Test",
+        email: "test@kanbanpro.com",
+        password: passwordHasheada,
+      });
+
+      // se crea el tablero y las listas por defecto para el usuario demo
+      const tablero = await Tablero.create({
+        nombre: "Tablero de ejemplo",
+        descripcion: "Tablero creado automaticamente para el usuario demo",
+        usuarioId: usuario.id,
+      });
+
+      const [backlog] = await Lista.bulkCreate([
+        { nombre: "Backlog", estado: "Backlog", tableroId: tablero.id },
+        { nombre: "Doing", estado: "Doing", tableroId: tablero.id },
+        { nombre: "Review", estado: "Review", tableroId: tablero.id },
+        { nombre: "Done", estado: "Done", tableroId: tablero.id },
+      ]);
+
+      await Tarjeta.create({
+        titulo: "Bienvenido a KanbanPro",
+        descripcion: "Esta es una tarjeta de ejemplo",
+        prioridad: "Task",
+        tag: "FEATURE",
+        estado: "Backlog",
+        autor: "Usuario Demo",
+        listaId: backlog.id,
+      });
+
+      console.log("Usuario demo creado correctamente.");
+    }
+
+    app.listen(PORT, () => {
+      console.log(`Servidor corriendo en http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("Error al iniciar el servidor:", error);
+  }
+}
+
+iniciarServidor();
